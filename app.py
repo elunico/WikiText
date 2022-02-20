@@ -28,7 +28,6 @@ def extract():
         try:
             get_wiki_text(url, isMarkdown, f)
         except:
-            raise
             return 'Error: Failed to get extract wiki text from {}'.format(url), 500
         return f.string
 
