@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wikipedia Text Extractor</title>
+
+  <!-- Compiled and minified CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <link rel="stylesheet" href="/static/index.css">
+</head>
+
+<body>
+  <h1>Welcome to WikiText</h1>
+
+  <p>Paste a wikipedia article URL below and click the button to fetch the text</p>
+  <input type="text" id="url" placeholder="https://en.wikipedia.org/wiki/...">
+
+  <select id="format">
+    <option value="text">Text Only</option>
+    <option value="markdown">Markdown</option>
+  </select>
+  <button class="button-primary" id="fetch">Fetch</button>
+
+
+  <!-- Compiled and minified JavaScript -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script src="/static/index.js"></script>
+</body>
+
+</html>
