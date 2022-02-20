@@ -36,7 +36,13 @@ submitButton.addEventListener('click', () => {
   formatSelect.setAttribute('disabled', true);
   statusArea.style.display = 'block';
   fetch(`/api/extract?url=${encodeURIComponent(url)}&format=${encodeURIComponent(formatSelect.value)}`)
-    .then(response => response.blob())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      } else {
+        return response.blob();
+      }
+    })
     .then(blob => {
       blob = blob.slice(0, blob.size, mimeForFormat(formatSelect.value));
       let fileURL = window.URL.createObjectURL(blob);
@@ -50,6 +56,12 @@ submitButton.addEventListener('click', () => {
       formatSelect.removeAttribute('disabled');
       statusArea.style.display = 'none';
       URL.revokeObjectURL(fileURL);
+    }).catch(error => {
+      console.error(error);
+      submitButton.removeAttribute('disabled');
+      formatSelect.removeAttribute('disabled');
+      alert(error);
+      statusArea.style.display = 'none';
     });
 
 });
