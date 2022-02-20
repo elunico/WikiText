@@ -7,7 +7,7 @@ function nameFromUrl(url) {
   const lastPart = urlParts[urlParts.length - 1];
   const nameParts = lastPart.split('.');
   console.log(nameParts);
-  return nameParts[0];
+  return nameParts[0].split('').filter(char => /\w/gi.test(char)).join('');
 }
 
 window.onload = function () {
@@ -16,7 +16,11 @@ window.onload = function () {
 
 submitButton.addEventListener('click', () => {
 
+  if (!urlField.value.startsWith('http')) {
+    urlField.value = 'https://' + urlField.value;
+  }
   const url = urlField.value;
+
   localStorage.setItem('format', formatSelect.value);
 
   fetch(`/api/extract?url=${url}&format=${formatSelect.value}`)
