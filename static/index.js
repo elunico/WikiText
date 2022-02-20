@@ -1,7 +1,7 @@
 const urlField = document.getElementById('url');
 const submitButton = document.getElementById('fetch');
 const formatSelect = document.getElementById('format');
-const statusArea = document.getElementById('status')
+const statusArea = document.getElementById('status');
 
 function nameFromUrl(url) {
   const urlParts = url.split('/');
@@ -12,7 +12,11 @@ function nameFromUrl(url) {
 }
 
 function extensionForFormat(format) {
-    return {'markdown': '.md', 'text': '.txt', 'pdf': '.pdf'}[format]
+  return { 'markdown': '.md', 'text': '.txt', 'pdf': '.pdf' }[format];
+}
+
+function mimeForFormat(format) {
+  return { 'markdown': 'text/markdown', 'text': 'text/plain', 'pdf': 'application/pdf' }[format];
 }
 
 window.onload = function () {
@@ -30,10 +34,11 @@ submitButton.addEventListener('click', () => {
 
   submitButton.setAttribute('disabled', true);
   formatSelect.setAttribute('disabled', true);
-  statusArea.style.display = 'block'
+  statusArea.style.display = 'block';
   fetch(`/api/extract?url=${encodeURIComponent(url)}&format=${encodeURIComponent(formatSelect.value)}`)
     .then(response => response.blob())
     .then(blob => {
+      blob = blob.slice(0, blob.size, mimeForFormat(formatSelect.value));
       let fileURL = window.URL.createObjectURL(blob);
       let a = document.createElement('a');
       a.href = fileURL;
@@ -43,7 +48,8 @@ submitButton.addEventListener('click', () => {
       a.remove();
       submitButton.removeAttribute('disabled');
       formatSelect.removeAttribute('disabled');
-      statusArea.style.display = 'none'
+      statusArea.style.display = 'none';
+      URL.revokeObjectURL(fileURL);
     });
 
 });
