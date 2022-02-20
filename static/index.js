@@ -23,7 +23,7 @@ submitButton.addEventListener('click', () => {
 
   localStorage.setItem('format', formatSelect.value);
 
-  fetch(`/api/extract?url=${url}&format=${formatSelect.value}`)
+  fetch(`/api/extract?url=${encodeURIComponent(url)}&format=${encodeURIComponent(formatSelect.value)}`)
     .then(response => response.blob())
     .then(blob => {
       let fileURL = window.URL.createObjectURL(blob);
