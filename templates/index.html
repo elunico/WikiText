@@ -15,14 +15,23 @@
 <body>
   <h1>Welcome to WikiText</h1>
 
-  <p>Paste a wikipedia article URL below and click the button to fetch the text</p>
+  <p>Paste a link to a Wikipedia article below.</p>
+  <p>You can extract all the text (and math formulas) from any article and <br>turn the text into a plain text, markdown, or formatted PDF file</p>
+  <p></p>
+  <label for="url">Article URL:</label>
   <input type="text" id="url" placeholder="https://en.wikipedia.org/wiki/...">
-
+<p></p>
+  <label for="format" >Format: </label>
   <select id="format">
     <option value="text">Text Only</option>
     <option value="markdown">Markdown</option>
+    <option value="pdf">PDF (Takes a while)</option>
   </select>
-  <button class="button-primary" id="fetch">Fetch</button>
+  <button class="button-primary" id="fetch">Extract Text</button>
+  <p id="status" style="display: none;">
+    Generating content please wait...
+    If you are creating a PDF this will take a few seconds
+  </p>
 
 
   <!-- Compiled and minified JavaScript -->
