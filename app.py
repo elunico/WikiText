@@ -9,7 +9,8 @@ from flask import Flask, request
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
-from main import StringFile, get_wiki_text
+from stringfile import StringFile
+from main import get_wiki_text
 
 app = Flask(__name__, static_url_path='/static')
 limiter = Limiter(app, key_func=get_remote_address)
