@@ -2,7 +2,7 @@ import os
 import sys
 import urllib.parse
 
-from flask import Flask, request
+from flask import Flask, make_response, request
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
@@ -36,11 +36,19 @@ def extract():
         article.after_render_hook = after_render_hook
 
         if format == 'pdf':
-            return md2pdf_bytes(article.render_markdown())
+            response = make_response(md2pdf_bytes(article.render_markdown()))
+            response.headers['Content-Type'] = 'application/pdf'
+            return response
         elif format == 'markdown':
-            return article.render_markdown()
+            response = make_response(article.render_markdown())
+            response.headers['Content-Type'] = 'text/markdown'
+            response.headers['encoding'] = 'utf-8'
+            return response
         else:
-            return article.render_text()
+            response = make_response(article.render_text())
+            response.headers['Content-Type'] = 'text/plain'
+            response.headers['encoding'] = 'utf-8'
+            return response
 
     except (AttributeError, ValueError, TypeError, OSError) as e:
         print("Error on url='{}': {}".format(url, repr(e)), file=sys.stderr)
