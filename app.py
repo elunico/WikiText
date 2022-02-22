@@ -16,6 +16,13 @@ app = Flask(__name__, static_url_path='/static')
 limiter = Limiter(app, key_func=get_remote_address)
 
 
+def md2pdf_bytes(markdown_text, css_filename='default.css'):
+    with tempfile.TemporaryDirectory() as d:
+        md2pdf.md2pdf(os.path.join(d, 'temp.pdf'), markdown_text, css_file_path=os.path.join('resources', css_filename))
+        with open(os.path.join(d, 'temp.pdf'), 'rb') as pdf:
+            return pdf.read()
+
+
 @app.route('/')
 def index():
     with open('templates/index.html') as f:
@@ -41,15 +48,10 @@ def extract():
         text = f.string
         text = re.sub(r'\[\d+]', '', text)
         text = re.sub(r'\[([^\[\]]+?)]', r'', text)
-        f.string = text
         if is_pdf:
-            with tempfile.TemporaryDirectory() as d:
-
-                md2pdf.md2pdf(os.path.join(d, 'temp.pdf'), f.string, css_file_path=os.path.join('resources', 'default.css'))
-                with open(os.path.join(d, 'temp.pdf'), 'rb') as pdf:
-                    return pdf.read()
+            return md2pdf_bytes(text)
         else:
-            return f.string
+            return text
 
     except (AttributeError, ValueError, TypeError, OSError) as e:
         print("Error on url='{}': {}".format(url, repr(e)), file=sys.stderr)

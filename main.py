@@ -53,7 +53,8 @@ def get_wiki_text(url: str, is_markdown: bool, f: Union[Writeable, TextIO]) -> b
             if element.name == 'p':
                 # we will go through all the children of the p to find math formulae separate from text
                 iterator = element.descendants
-                child_set = False  # needed for later, sometimes we do not want to advance the iterator
+                # needed for later, sometimes we do not want to advance the iterator
+                child_set = False
                 child: Optional[Union[NavigableString, Tag]] = None
                 while True:
                     # iterate manually so we can skip children of math elements
@@ -67,7 +68,6 @@ def get_wiki_text(url: str, is_markdown: bool, f: Union[Writeable, TextIO]) -> b
 
                         if child is not None and is_math_element(child):
                             write_math_element(child, f, is_markdown)
-
                             # remove the rest of the descendants to prevent repeated formulas
                             # save a reference to the math span so it can be removed *AFTER* skipping descendants
                             # because otherwise beautiful soup will throw an error because it is not in the tree -.-
@@ -79,7 +79,6 @@ def get_wiki_text(url: str, is_markdown: bool, f: Union[Writeable, TextIO]) -> b
                             # we have already found the next child so that it will not be discarded
                             # then we can remove the original span and all its children
                             math_span.extract()
-
                         elif isinstance(child, str):
                             # going through descendants extracts all tags and all text subsequent to the tags
                             # so if we get some text that is not a formula just write it out to the file
@@ -89,7 +88,6 @@ def get_wiki_text(url: str, is_markdown: bool, f: Union[Writeable, TextIO]) -> b
                                 f.write(text)
                     except StopIteration:
                         break
-
                 # end each paragraph with a blank line
                 f.write('\n\n')
             elif element.name is not None and element.name.startswith('h') and element.text.strip():
