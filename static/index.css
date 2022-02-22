@@ -17,5 +17,9 @@ select {
 }
 
 label {
-    align-self: flex-start;
+  align-self: flex-start;
+}
+
+.empty-space {
+  white-space: pre;
 }

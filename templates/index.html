@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
   <title>Wikipedia Text Extractor</title>
 
   <!-- Compiled and minified CSS -->
@@ -16,12 +16,13 @@
   <h1>Welcome to WikiText</h1>
 
   <p>Paste a link to a Wikipedia article below.</p>
-  <p>You can extract all the text (and math formulas) from any article and <br>turn the text into a plain text, markdown, or formatted PDF file</p>
+  <p>You can extract all the text (and math formulas) from any article and <br>turn the text into a plain text,
+    markdown, or formatted PDF file</p>
   <p></p>
   <label for="url">Article URL:</label>
   <input type="text" id="url" placeholder="https://en.wikipedia.org/wiki/...">
-<p></p>
-  <label for="format" >Format: </label>
+  <p></p>
+  <label for="format">Format: </label>
   <select id="format">
     <option value="text">Text Only</option>
     <option value="markdown">Markdown</option>
@@ -32,6 +33,9 @@
     Generating content please wait...
     If you are creating a PDF this will take a few seconds
   </p>
+
+  <p class="empty-space">&nbsp;</p>
+  <p class="empty-space">&nbsp;</p>
 
 
   <!-- Compiled and minified JavaScript -->
