@@ -70,10 +70,10 @@ class Article:
 
     def render_text(self) -> str:
         content = self.before_render_hook(self.content)
-        output = ''.join(e.render_text() for e in self.content)
+        output = ''.join(e.render_text() for e in content)
         return self.after_render_hook(output)
 
     def render_markdown(self) -> str:
         content = self.before_render_hook(self.content)
-        output = ''.join(e.render_markdown() for e in self.content)
+        output = ''.join(e.render_markdown() for e in content)
         return self.after_render_hook(output)
