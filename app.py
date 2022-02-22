@@ -1,26 +1,16 @@
 import os
-import re
 import sys
-import tempfile
 import urllib.parse
-import md2pdf
 
 from flask import Flask, request
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
-from stringfile import StringFile
-from main import get_wiki_text
+from parsing.main import extract_wiki_content
+from util import after_render_hook, md2pdf_bytes
 
 app = Flask(__name__, static_url_path='/static')
 limiter = Limiter(app, key_func=get_remote_address)
-
-
-def md2pdf_bytes(markdown_text, css_filename='default.css'):
-    with tempfile.TemporaryDirectory() as d:
-        md2pdf.md2pdf(os.path.join(d, 'temp.pdf'), markdown_text, css_file_path=os.path.join('resources', css_filename))
-        with open(os.path.join(d, 'temp.pdf'), 'rb') as pdf:
-            return pdf.read()
 
 
 @app.route('/')
@@ -34,24 +24,23 @@ def index():
 def extract():
     url = urllib.parse.unquote(request.args.get('url'))
     url_object = urllib.parse.urlparse(url)
-    is_pdf = request.args.get('format') == 'pdf'
-    is_markdown = request.args.get('format') == 'markdown' or is_pdf
+    format = request.args.get('format')
 
     if not url:
         return 'Error: No url provided', 400
     if not url_object.netloc.endswith('wikipedia.org'):
         return 'Error: Invalid URL. We only support wikipedia.org websites right now.', 400
 
-    f = StringFile('')
     try:
-        get_wiki_text(url, is_markdown, f)
-        text = f.string
-        text = re.sub(r'\[\d+]', '', text)
-        text = re.sub(r'\[([^\[\]]+?)]', r'', text)
-        if is_pdf:
-            return md2pdf_bytes(text)
+        article = extract_wiki_content(url)
+        article.after_render_hook = after_render_hook
+
+        if format == 'pdf':
+            return md2pdf_bytes(article.render_markdown())
+        elif format == 'markdown':
+            return article.render_markdown()
         else:
-            return text
+            return article.render_text()
 
     except (AttributeError, ValueError, TypeError, OSError) as e:
         print("Error on url='{}': {}".format(url, repr(e)), file=sys.stderr)

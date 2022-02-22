@@ -1,10 +1,12 @@
 import argparse
 import re
-import requests
 import sys
+from optparse import Option
+from typing import Callable, List, Optional, TextIO, Union
+
+import requests
 from bs4 import BeautifulSoup, NavigableString, Tag
-from stringfile import Writeable
-from typing import Optional, TextIO, Union
+from parsing.elements import Article, Header, MathElement, Paragraph, Text
 
 
 def parse_args():
@@ -15,16 +17,6 @@ def parse_args():
     parser.add_argument('-m', '--markdown', help='Output in markdown format.', action='store_true')
     args = parser.parse_args()
     return args
-
-
-def write_math_element(child, f, is_markdown):
-    if is_markdown:
-        # add the image links for formulae
-        image_src = child.find('img').get('src')
-        f.write(' ![]({}) '.format(image_src))
-    else:
-        # write the text formula but clean it up a little
-        f.write(child.text.replace('\n', ''))
 
 
 def is_math_element(child):
@@ -40,17 +32,19 @@ def skip_all_descendants(child, iterator):
     return child
 
 
-def get_wiki_text(url: str, is_markdown: bool, f: Union[Writeable, TextIO]) -> bool:
+def extract_wiki_content(url: str) -> Optional[Article]:
     r = requests.get(url)
     soup = BeautifulSoup(r.text, 'html.parser')
-    content = soup.find('div', {'id': 'mw-content-text'})
+    article = soup.find('div', {'id': 'mw-content-text'})
+    content = []
     try:
         # all the content of a wikipedia article lives in mv-content-text
         # we will go through every descendant (recursively) of that div
         # to find all the content we care about so that it can be formatted correctly
-        for element in content.descendants:
+        for element in article.descendants:
             # p elements contain the paragraphs of text content and math formulae images
             if element.name == 'p':
+                paragraph = Paragraph()
                 # we will go through all the children of the p to find math formulae separate from text
                 iterator = element.descendants
                 # needed for later, sometimes we do not want to advance the iterator
@@ -67,7 +61,7 @@ def get_wiki_text(url: str, is_markdown: bool, f: Union[Writeable, TextIO]) -> b
                             child_set = False
 
                         if child is not None and is_math_element(child):
-                            write_math_element(child, f, is_markdown)
+                            paragraph.append(MathElement(child.text.replace('\n', ''), child.find('img').get('src')))
                             # remove the rest of the descendants to prevent repeated formulas
                             # save a reference to the math span so it can be removed *AFTER* skipping descendants
                             # because otherwise beautiful soup will throw an error because it is not in the tree -.-
@@ -85,24 +79,17 @@ def get_wiki_text(url: str, is_markdown: bool, f: Union[Writeable, TextIO]) -> b
                             if child:
                                 text = re.sub(r'\[\d+]', '', child)
                                 text = re.sub(r'\[([^\[\]]+?)]', r'', text)
-                                f.write(text)
+                                paragraph.append(Text(text))
                     except StopIteration:
                         break
                 # end each paragraph with a blank line
-                f.write('\n\n')
+                content.append(paragraph)
             elif element.name is not None and element.name.startswith('h') and element.text.strip():
-                if is_markdown:
-                    header = '#' * int(element.name[1])
-                    f.write(header)
-                    f.write(' ')
-                f.write(element.text.strip())
-                f.write('\n\n')
-        return True
+                content.append(Header(int(element.name[1]), element.text.strip()))
+        return Article(content)
     except IOError:
         print('Failed to write to output file.')
-        return False
-    finally:
-        f.close()
+        return None
 
 
 def main():
@@ -111,7 +98,7 @@ def main():
     output = args.output
 
     f = open(output, 'w') if output != '-' else sys.stdout  # open output file or stdout
-    get_wiki_text(url, args.markdown, f)
+    extract_wiki_content(url, args.markdown, f)
 
 
 if __name__ == '__main__':
