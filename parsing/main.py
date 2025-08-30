@@ -33,7 +33,8 @@ def skip_all_descendants(child, iterator):
 
 
 def extract_wiki_content(url: str) -> Optional[Article]:
-    r = requests.get(url)
+    r = requests.get(url, headers={
+                     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Safari/605.1.15'})
     soup = BeautifulSoup(r.text, 'html.parser')
     article = soup.find('div', {'id': 'mw-content-text'})
     content = []

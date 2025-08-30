@@ -1,5 +1,6 @@
 import os
 import sys
+import uuid
 import urllib.parse
 
 from flask import Flask, make_response, request
@@ -17,6 +18,14 @@ limiter = Limiter(app, key_func=get_remote_address)
 def index():
     with open('templates/index.html') as f:
         return f.read()
+
+
+@app.get('/robots.txt')
+def robots():
+    with open('../utilities/robots.txt') as f:
+        r = make_response(f.read())
+    r.headers['Content-Type'] = 'text/plain'
+    return r
 
 
 @app.route('/api/extract')
@@ -51,8 +60,13 @@ def extract():
             return response
 
     except (AttributeError, ValueError, TypeError, OSError) as e:
-        print("Error on url='{}': {}".format(url, repr(e)), file=sys.stderr)
-        return 'Error: Failed to get extract wiki text from {}'.format(url), 500
+        err_id = uuid.uuid4()
+        print("[{}] Error on url='{}': {}".format(err_id, url, repr(e)))
+        return '[{}] Error: Failed to get extract wiki text from {}'.format(err_id, url), 500
+    except Exception as e:
+        err_id = uuid.uuid4()
+        print("[{}] Error on url='{}': {}".format(err_id, url, repr(e)))
+        return '[{}] Error: The server encountered an unknown error {}'.format(err_id, url), 500
 
 
 if __name__ == "__main__":
