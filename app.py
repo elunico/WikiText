@@ -11,7 +11,7 @@ from parsing.main import extract_wiki_content
 from util import after_render_hook, md2pdf_bytes
 
 app = Flask(__name__, static_url_path='/static')
-limiter = Limiter(app, key_func=get_remote_address)
+limiter = Limiter(get_remote_address, app=app)
 
 
 @app.route('/')
